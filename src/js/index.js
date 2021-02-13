@@ -1,27 +1,59 @@
-import { $ } from './utils.js'
-import { add, move, remove } from './functions.js'
+const $ = (s, p = document) => p.querySelector(s);
+const $$ = (s, p = document) => p.querySelectorAll(s);
 
+let input = $(".insert");
 let ul_todo = $(".todo");
 let ul_done = $(".done");
-let form = $("form");
+let form = $(".form_todo");
 
-
-// add todo 
 form.addEventListener("submit", (event) => add(event, ul_todo));
 
-// move to another list on click
-ul_done.addEventListener("click", (event) => move(event, ul_todo));
-ul_todo.addEventListener("click", (event) => move(event, ul_done));
 
-// remove from the list on dblclk
-ul_todo.addEventListener("dblclick", remove);
-ul_done.addEventListener("dblclick", remove);
+export function add(event, place) {
+    // console.log('add');
+    event.preventDefault();
+
+    if (input.value) {
+        place.innerHTML += `<li><span>id: </span>${input.value}
+        <span class="buttons">
+            <button class="setDone icon-checkmark"></button>
+            <button class="update icon-pencil"></button>
+            <button class="remove icon-bin"></button>
+            <button class="setUndone icon-undo"></button>
+        </span>
+                        </li>`;
+        // localStorage.setItem("todos", JSON.stringify([...JSON.parse(localStorage.todos || '[]'), input.value]))
+        input.value = "";
+    }
+
+    // addEventListener to all buttons
+    // -- !!! --  every time adding for all todos again. need change to add every time for the new one only 
+    $$(".setDone").forEach(item => item.addEventListener("click", (event) => move(event, ul_done)));
+    $$(".setUndone").forEach(item => item.addEventListener("click", (event) => move(event, ul_todo)));
+    $$(".update").forEach(item => item.addEventListener("click", update));
+    $$(".remove").forEach(item => item.addEventListener("click", remove));
+}
+
+export function move(event, place) {
+    // console.log('move');
+    console.log(event.target);
+    event.target.parentNode.parentNode.remove();
+    place.appendChild(event.target.parentNode.parentNode);
+}
 
 
+function remove(event) {
+    // console.log('remove');
+    event.preventDefault();
+    event.target.parentNode.parentNode.remove();
+}
 
 
-// start position xxx
-
-const todos = localStorage.todos ? JSON.parse(localStorage.todos) : [];
-ul_todo.innerHTML = todos.map(todo => `<li>${todo}</li>`).join('');
-
+export function update(event) {
+    console.log('update');
+    if (input.value) {
+        console.log(event.target.parentNode.parentNode.childNodes[1].nodeValue);
+        event.target.parentNode.parentNode.childNodes[1].nodeValue = input.value + ' ';
+        input.value = '';
+    }
+}
